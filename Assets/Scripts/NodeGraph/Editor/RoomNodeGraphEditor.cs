@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Xml;
 using GameManager;
 using UnityEditor;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace NodeGraph.Editor
     public class RoomNodeGraphEditor : EditorWindow
     {
         private GUIStyle _roomNodeStyle;
+        private GUIStyle _roomNodeSelectedStyle;
         private RoomNodeTypeListSO _roomNodeTypeListSo;
         private RoomNodeSO _currentRoomNode;
         private static RoomNodeGraphSO _currentRoomNodeGraph;
@@ -26,6 +28,7 @@ namespace NodeGraph.Editor
         
         private void OnEnable()
         {
+            Selection.selectionChanged += InspectorSelectionChanged;
             _roomNodeStyle = new GUIStyle
             {
                 normal =
@@ -36,11 +39,39 @@ namespace NodeGraph.Editor
                 padding = new RectOffset( NodePadding,NodePadding, NodePadding,NodePadding),
                 border = new RectOffset( NodeBorder,NodeBorder, NodeBorder,NodeBorder)
             };
+            
+            _roomNodeSelectedStyle = new GUIStyle
+            {
+                normal =
+                {
+                    background = EditorGUIUtility.Load("node1 on") as Texture2D,
+                    textColor = Color.green
+                },
+                padding = new RectOffset( NodePadding,NodePadding, NodePadding,NodePadding),
+                border = new RectOffset( NodeBorder,NodeBorder, NodeBorder,NodeBorder)
+            };
 
             _roomNodeTypeListSo = GameResources.Instance.roomNodeTypeList;
         }
 
-        
+        private void OnDisable()
+        {
+            Selection.selectionChanged -= InspectorSelectionChanged;
+        }
+
+        private void InspectorSelectionChanged()
+        {
+            RoomNodeGraphSO roomNodeGraph = Selection.activeObject as RoomNodeGraphSO;
+
+            if (roomNodeGraph != null)
+            {
+                _currentRoomNodeGraph = roomNodeGraph;
+                GUI.changed = true;
+            }
+            
+        }
+
+
         [MenuItem("Room node editor", menuItem = "Window/Dungeon Editor/Room Node Graph Editor")]
         private static void Init()
         {
@@ -136,8 +167,8 @@ namespace NodeGraph.Editor
         {
             foreach (RoomNodeSO roomNode in _currentRoomNodeGraph.roomNodes)
             {
-                if (roomNode != null)
-                    roomNode.Draw(_roomNodeStyle);
+                if (roomNode == null) continue;
+                roomNode.Draw(roomNode.isSelected ? _roomNodeSelectedStyle : _roomNodeStyle);
             }
 
             GUI.changed = true;
@@ -232,6 +263,24 @@ namespace NodeGraph.Editor
             {
                 ShowContextMenu(currentEvent.mousePosition);
             }
+
+            if (currentEvent.button == 1)
+            {
+                ClearLineDrag();
+                ClearAllSelectedRoomNodes();
+            }
+        }
+
+        private void ClearAllSelectedRoomNodes()
+        {
+            foreach (var roomNode in _currentRoomNodeGraph.roomNodes)
+            {
+                if (roomNode.isSelected)
+                {
+                    roomNode.isSelected = false;
+                    GUI.changed = true;
+                }
+            }
         }
 
         private void ShowContextMenu(Vector2 mousePosition)
@@ -245,6 +294,10 @@ namespace NodeGraph.Editor
 
         private void CreateRoomNode(object mousePositionObject)
         {
+            if (_currentRoomNodeGraph.roomNodes.Count == 0)
+            {
+                CreateRoomNode(new Vector2(200f, 200f), _roomNodeTypeListSo.typeList.Find(x => x.isEntrance));
+            }
             CreateRoomNode(mousePositionObject, _roomNodeTypeListSo.typeList.Find(x => x.isNone));
         }
 

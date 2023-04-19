@@ -24,6 +24,18 @@ namespace NodeGraph
                 RoomNodeDictionary[node.id] = node;
             }
         }
+
+        public RoomNodeSO GetRoomNode(string roomNodeID)
+        {
+            if (RoomNodeDictionary.TryGetValue(roomNodeID, out RoomNodeSO roomNode))
+            {
+                return roomNode;
+            }
+#if UNITY_EDITOR
+            Debug.Log($"There is no such {roomNodeID} in RoomNodeDictionary");
+#endif
+            return null;
+        }
         
 #if UNITY_EDITOR
         [HideInInspector] public RoomNodeSO roomNodeToDrawLineFrom = null;

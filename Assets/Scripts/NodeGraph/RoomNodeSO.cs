@@ -41,11 +41,17 @@ namespace NodeGraph
             
             EditorGUI.BeginChangeCheck();
 
-            
-            var selected = roomNodeTypeList.typeList.FindIndex(x => x == roomNodeType);
-            var selection = EditorGUILayout.Popup("", selected, GetRoomNodeTypeToDisplay());
+            if (parentRoomNodeIDList.Count > 0 || roomNodeType.isEntrance)
+            {
+                EditorGUILayout.LabelField(roomNodeType.roomNodeTypeName);
+            }
+            else
+            {
+                var selected = roomNodeTypeList.typeList.FindIndex(x => x == roomNodeType);
+                var selection = EditorGUILayout.Popup("", selected, GetRoomNodeTypeToDisplay());
                 
-            roomNodeType = roomNodeTypeList.typeList[selection];
+                roomNodeType = roomNodeTypeList.typeList[selection];
+            }
             
             if (EditorGUI.EndChangeCheck())
             {
