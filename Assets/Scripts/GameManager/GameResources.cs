@@ -1,6 +1,6 @@
 using NodeGraph;
 using UnityEngine;
-using UnityEditor;
+using UnityEngine.Serialization;
 
 namespace GameManager
 {
@@ -22,6 +22,7 @@ namespace GameManager
 
         #region Header DUNGEON
 
+        [FormerlySerializedAs("RoomNodeTypeList")]
         [Space(10)]
         [Header("Dungeon")]
 
@@ -32,6 +33,6 @@ namespace GameManager
 
         #endregion
         
-        public RoomNodeTypeListSO RoomNodeTypeList;
+        public RoomNodeTypeListSO roomNodeTypeList;
     }
 }
